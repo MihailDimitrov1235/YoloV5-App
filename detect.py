@@ -29,6 +29,7 @@ import os
 import platform
 import sys
 from pathlib import Path
+from getPosition import get_position
 
 import torch
 
@@ -160,6 +161,10 @@ def run(
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
+                        print(get_position(*xywh))
+                        # print(im0.shape[0])
+                        # print(im0.shape[1])
+                        # print(im0.shape)
                         with open(f'{txt_path}.txt', 'a') as f:
                             f.write('class x y w h conf\n')
                             f.write(('%g ' * len(line)).rstrip() % line + '\n')
