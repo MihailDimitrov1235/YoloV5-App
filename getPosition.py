@@ -1,6 +1,4 @@
-def get_position(*xywh):
-    print(*xywh)
-    x, y = get_center(*xywh)
+def get_position(x, y):
 
     if x < 0.2:
         x_pos = "left"
