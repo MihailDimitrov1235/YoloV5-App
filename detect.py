@@ -85,6 +85,7 @@ def run(
     imgsz = check_img_size(imgsz, s=stride)  # check image size
     while(source != "0000"):
         source = input()
+        start_time = time.time()
         source = str(source)
         save_img = not nosave and not source.endswith('.txt')  # save inference images
         is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
@@ -217,6 +218,8 @@ def run(
             # LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
         if update:
             strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
+        print()
+        print("--- %s seconds ---" % (time.time() - start_time))
 
 
 # def parse_opt():
