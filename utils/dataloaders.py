@@ -237,7 +237,8 @@ class LoadScreenshots:
 
 class LoadImages:
     # YOLOv5 image/video dataloader, i.e. `python detect.py --source image.jpg/vid.mp4`
-    def __init__(self, path, img_size=640, stride=32, auto=True, transforms=None, vid_stride=1):
+    def __init__(self, image, path, img_size=640, stride=32, auto=True, transforms=None, vid_stride=1):
+        self.image = image
         if isinstance(path, str) and Path(path).suffix == ".txt":  # *.txt file with img/vid/dir on each line
             path = Path(path).read_text().rsplit()
         files = []
@@ -303,7 +304,11 @@ class LoadImages:
         else:
             # Read image
             self.count += 1
-            im0 = cv2.imread(path)  # BGR
+            # im0 = cv2.imread(path)  # BGR
+            im0 = self.image
+            # cv2.imshow('image', im0)
+            # cv2.waitKey(0)
+            # cv2.destroyAllWindows()
             assert im0 is not None, f'Image Not Found {path}'
             s = f'image {self.count}/{self.nf} {path}: '
 
