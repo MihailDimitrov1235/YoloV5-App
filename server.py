@@ -1,3 +1,4 @@
+import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from requests_toolbelt.multipart import decoder
 import numpy as np
@@ -63,7 +64,7 @@ def detect(
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
 ):
-    response = ''
+    response = []
     # Load model
     device = select_device(device)
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
@@ -123,7 +124,10 @@ def detect(
                     for *xyxy, conf, cls in reversed(det):
 
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
-                        response += f"{names[int(cls)]} {get_position(xywh[0],xywh[1])}\n"
+                        # response = {} = get_position(xywh[0],xywh[1])
+                        response1 = [(names[int(cls)])]
+                        response1 = get_position(xywh[0],xywh[1],response1)
+                        response.append(response1)
 
             # Stream results
 
@@ -143,7 +147,8 @@ class MyServer(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        self.wfile.write(bytes(response, "utf-8"))
+        response = json.dumps(response)
+        self.wfile.write(bytes(response ,"utf-8"))
         # self.wfile.write(bytes("<html><head><title>https://pythonbasics.org</title></head>", "utf-8"))
 
 if __name__ == "__main__":        
