@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from getPosition import get_position
 import time
+from urllib.parse import urlparse
+from resultEN import messageEN
 
 import torch
 
@@ -50,6 +52,8 @@ imgsz = check_img_size(imgsz, s=stride)  # check image size
 
 def detect(
         image,
+        word,
+        lang,
         weights=ROOT / 'yolov5s.pt',  # model path or triton URL
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
@@ -64,7 +68,7 @@ def detect(
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
 ):
-    response = []
+    responseArray = []
     # Load model
     device = select_device(device)
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
@@ -122,28 +126,36 @@ def detect(
                         # s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
                     # Write results
                     for *xyxy, conf, cls in reversed(det):
-
-                        xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
-                        # response = {} = get_position(xywh[0],xywh[1])
-                        response1 = [(names[int(cls)])]
-                        response1 = get_position(xywh[0],xywh[1],response1)
-                        response.append(response1)
+                        if (word == names[int(cls)]) or (word == "all"):
+                            xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
+                            # response = {} = get_position(xywh[0],xywh[1])
+                            current = [(names[int(cls)])]
+                            current = get_position(xywh[0],xywh[1],current)
+                            responseArray.append(current)
 
             # Stream results
 
         if update:
             strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
+        response = messageEN(responseArray, word)
+
         return response
+
 
 class MyServer(BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
         post_body = self.rfile.read(content_length)
 
+        query = urlparse(self.path).query
+        query_components = dict(qc.split("=") for qc in query.split("&"))
+        word = query_components["word"]
+        lang = query_components["lang"]
+
         nparr = np.fromstring(post_body, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        response = detect(img)
+        response = detect(img,word,lang)
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
