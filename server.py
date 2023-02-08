@@ -10,6 +10,7 @@ from getPosition import get_position
 import time
 from urllib.parse import urlparse
 from resultEN import messageEN
+from resultBG import messageBG
 
 import torch
 
@@ -137,7 +138,10 @@ def detect(
 
         if update:
             strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
-        response = messageEN(responseArray, word)
+        if lang == "en":
+            response = messageEN(responseArray, word)
+        elif lang == "bg":
+            response = messageBG(responseArray, word)
 
         return response
 
