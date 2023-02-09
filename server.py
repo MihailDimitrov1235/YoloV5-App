@@ -25,8 +25,8 @@ from utils.augmentations import (letterbox)
 from utils.general import (Profile, check_img_size, non_max_suppression, scale_boxes, strip_optimizer, xyxy2xywh)
 from utils.torch_utils import select_device, smart_inference_mode
 
-hostName = "127.0.0.1"
-serverPort = 8080
+hostName = "localhost"
+serverPort = 80
 
 #INItialization
 
